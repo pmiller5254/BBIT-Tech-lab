@@ -1,0 +1,79 @@
+#1
+from interfaces.securityInterface import securityInterface
+
+class security(securityInterface):
+    def __init__(self, name) -> None:
+        super().__init__(name)
+        self.m_name = name
+        
+    def getName(self) -> str:
+        return self.m_name
+``
+
+#2
+
+from interfaces.positionInterface import positionInterface
+from implementations.securitySolution import security
+
+class position(positionInterface):
+    def __init__(self, sec_obj, initialPosition: int):
+        if isinstance(sec_obj, str):
+            self.security = security(sec_obj)
+        else:
+            self.security = sec_obj
+            
+        self.position = initialPosition
+        
+    def getSecurity(self):
+        return self.security
+    
+    def getPosition(self):
+        return self.position
+    def setPosition(self, inputValue: int):
+        if inputValue < 0:
+            raise Exception()
+        else:
+            self.position = inputValue
+        
+    def addPosition(self, inputValue: int):
+        newValue = self.position + inputValue
+        if newValue < 0:
+            raise Exception()
+        else:
+            self.position = newValue
+            
+#3
+
+from interfaces.accountInterface import accountInterface
+from implementations.positionSolution import position
+
+class account(accountInterface):
+    def __init__(self, positions: Set[positionInterface], accountName: str) -> None:
+        self.accountName = accountName
+        self.positions = {} #dictionary to hold account's positions
+        for p in positions: #looping through input set of positions
+            sec = p.getSecurity().getName() # value for names of securities
+            if sec in self.positions.keys(): # if already in dict
+                self.positions[sec] = p.getPosition() #add values already in dict with new value
+            else: #if not in dict
+                self.positions[sec] = p.getPosition() #add to dict
+
+    def getName(self) -> str:
+        return self.accountName
+
+    def getAllPositions(self) -> Iterable[positionInterface]:
+        return self.positions
+
+    def getPositions(self, securities: Set) -> Dict[Any, positionInterface]:
+        positionDict = {}
+        for s in securities:
+            if s in self.positions.keys():
+                positionDict[s] = self.positions[s]
+        return positionDict
+                
+
+    def addPositions(self, positions: Set[positionInterface]) -> None:
+        
+    
+    def removePositions(self, securities: Set) -> None:
+        pass
