@@ -44,6 +44,9 @@ class position(positionInterface):
             
 #3
 
+
+from typing import Any, Dict, Set, Iterable
+from interfaces.positionInterface import positionInterface
 from interfaces.accountInterface import accountInterface
 from implementations.positionSolution import position
 
@@ -53,27 +56,39 @@ class account(accountInterface):
         self.positions = {} #dictionary to hold account's positions
         for p in positions: #looping through input set of positions
             sec = p.getSecurity().getName() # value for names of securities
-            if sec in self.positions.keys(): # if already in dict
-                self.positions[sec] = p.getPosition() #add values already in dict with new value
-            else: #if not in dict
-                self.positions[sec] = p.getPosition() #add to dict
+            self.positions[sec] = p #add values already in dict with new value    {  aapl: position(aapl,100) }
 
     def getName(self) -> str:
         return self.accountName
 
     def getAllPositions(self) -> Iterable[positionInterface]:
-        return self.positions
+        allPositions = set()
+        for value in self.positions.values():
+            allPositions.add(value)
+        return allPositions
 
     def getPositions(self, securities: Set) -> Dict[Any, positionInterface]:
         positionDict = {}
         for s in securities:
-            if s in self.positions.keys():
-                positionDict[s] = self.positions[s]
+            if isinstance(s, str):
+                sec_name = s
+            else:
+                sec_name = s.getName()
+            if sec_name in self.positions.keys():
+                positionDict[s] = self.positions[sec_name]
         return positionDict
                 
 
     def addPositions(self, positions: Set[positionInterface]) -> None:
-        
+        for s in positions:
+            name = s.getSecurity().getName()
+            self.positions[name] = s
     
     def removePositions(self, securities: Set) -> None:
-        pass
+        for s in securities:
+            sec_name = s.getName()
+            if sec_name in self.positions.keys():
+                del self.positions[sec_name] 
+        return self.positions
+        
+#4
