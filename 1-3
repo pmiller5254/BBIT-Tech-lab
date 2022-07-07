@@ -92,3 +92,80 @@ class account(accountInterface):
         return self.positions
         
 #4
+
+from typing import Set, Iterable
+from interfaces.accountInterface import accountInterface
+from interfaces.securityInterface import securityInterface
+from interfaces.portfolioInterface import portfolioInterface
+from implementations.accountSolution import account
+import implementations.portfolioSolution
+
+class portfolio(portfolioInterface):
+    def __init__(self, portfolioName: str, accounts: Set[accountInterface]) -> None:
+        self.portfoliioName = portfolioName
+        self.accounts = set(accounts)
+
+    def getAllAccounts(self) -> Iterable[accountInterface]:
+        return self.accounts
+
+    def getAccounts(self, accountNamesFilter:Set[str], securitiesFilter:Set) -> Iterable[accountInterface]:
+        accountList = []
+        tempList = []
+        if len(accountNamesFilter):
+            tempList1 = []
+            for acc_name in accountNamesFilter:
+                tempList.append(acc_name)
+            for acc in self.accounts:
+                name = acc.getName()
+                if name in tempList:
+                    tempList1.append(acc)
+                    
+        if len(securitiesFilter):
+            sec_list = []  
+            tempList2 = []
+            for sec_name in securitiesFilter:
+                if isinstance(sec_name, str):
+                    s_obj = sec_name
+                else:
+                    s_obj = sec_name.getName()
+                sec_list.append(s_obj)
+            for acc in self.accounts:
+                p = acc.getPositions(securitiesFilter)
+                for sec in sec_list:
+                    if sec in p.keys():
+                        tempList2.append(acc)
+                        
+        if tempList1 and tempList2:
+            for i in tempList1:
+                if i in tempList2:
+                    accountList.append(i)
+                return accountList
+            
+        elif tempList1:
+            return tempList1
+        
+        elif tempList2:
+            return tempList2
+
+    def addAccounts(self, accounts: Set[accountInterface]) -> None:
+        accountNamesList = {}
+        for ac in self.accounts:
+            nm = ac.getName()
+            accountNamesList[nm] = ac
+        for account in accounts:
+            name = account.getName()
+            if name in accountNamesList.keys():
+                self.accounts.remove(accountNamesList[name])
+                self.accounts.add(account)
+            else:
+                self.accounts.add(account)
+            
+
+    def removeAccounts(self, accountNames: Set[str]) -> None:
+        accountNamesDict = {}
+        for ac in self.accounts:
+            nm = ac.getName()
+            accountNamesDict[nm] = ac
+        for name in accountNames:
+            if name in accountNamesDict.keys():
+                self.accounts.remove(accountNamesDict[name])
